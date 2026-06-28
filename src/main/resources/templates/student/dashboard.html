@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/main :: layout(~{::content}, 'My Dashboard')}">
+<th:block th:fragment="content">
+
+<!-- Welcome Banner -->
+<div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 mb-6 text-white">
+    <h2 class="text-lg font-bold" th:text="'Welcome back, ' + ${student.fullName} + '!'">Welcome!</h2>
+    <p class="text-blue-100 text-sm mt-1">Ready to take a mock test today?</p>
+</div>
+
+<!-- Stats Row -->
+<div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <div class="text-2xl font-bold text-gray-800" th:text="${available.size()}">0</div>
+        <div class="text-sm text-gray-500 mt-1">Available Exams</div>
+    </div>
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <div class="text-2xl font-bold text-gray-800" th:text="${myAttempts.size()}">0</div>
+        <div class="text-sm text-gray-500 mt-1">My Attempts</div>
+    </div>
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 col-span-2 lg:col-span-1">
+        <div class="text-2xl font-bold text-gray-800"
+             th:text="${#lists.isEmpty(myAttempts) ? '—' :
+             #numbers.formatDecimal(myAttempts.stream().filter(a -> a.result != null).mapToDouble(a -> a.result.percentage).average().orElse(0), 1, 1) + '%'}">—</div>
+        <div class="text-sm text-gray-500 mt-1">Avg Score</div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- Available Exams -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-gray-800">Available Exams</h3>
+            <a href="/student/exams" class="text-xs text-blue-600 hover:underline">View All</a>
+        </div>
+        <div th:if="${#lists.isEmpty(available)}" class="text-gray-400 text-sm text-center py-6">
+            No exams available yet.
+        </div>
+        <div class="space-y-3">
+            <div th:each="e : ${available}" th:if="${examStat.index < 4}"
+                 class="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-blue-50 transition-colors">
+                <div>
+                    <div class="text-sm font-medium text-gray-800" th:text="${e.title}">Exam</div>
+                    <div class="text-xs text-gray-400 mt-0.5"
+                         th:text="${e.durationMinutes + ' min · ' + e.totalQuestions + ' questions'}">60 min</div>
+                </div>
+                <a th:href="@{/student/exam/{id}/start(id=${e.id})}"
+                   class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors">
+                    Start
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Recent Results -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-gray-800">My Recent Results</h3>
+            <a href="/student/results" class="text-xs text-blue-600 hover:underline">View All</a>
+        </div>
+        <div th:if="${#lists.isEmpty(myAttempts)}" class="text-gray-400 text-sm text-center py-6">
+            No attempts yet. Start an exam!
+        </div>
+        <div class="space-y-3">
+            <div th:each="a : ${myAttempts}" th:if="${aStat.index < 5}"
+                 th:if="${a.status.name() == 'SUBMITTED'}"
+                 class="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                <div>
+                    <div class="text-sm font-medium text-gray-800" th:text="${a.exam.title}">Exam</div>
+                    <div class="text-xs text-gray-400 mt-0.5">
+                        <span th:if="${a.result}" th:text="${a.result.correctAnswers + ' correct · ' + a.result.wrongAnswers + ' wrong'}"></span>
+                        <span th:unless="${a.result}" th:text="${a.status}"></span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div th:if="${a.result}"
+                         class="text-sm font-bold text-blue-700"
+                         th:text="${#numbers.formatDecimal(a.result.percentage, 1, 1) + '%'}">0%</div>
+                    <a th:if="${a.status.name() == 'SUBMITTED'}"
+                       th:href="@{/student/result/{id}(id=${a.id})}"
+                       class="text-xs text-blue-600 hover:underline">View</a>
+                    <a th:if="${a.status.name() == 'IN_PROGRESS'}"
+                       th:href="@{/student/exam/{id}/take(id=${a.id})}"
+                       class="text-xs text-yellow-600 hover:underline">Continue</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</th:block>
+</html>

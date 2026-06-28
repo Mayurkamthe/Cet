@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/main :: layout(~{::content}, 'Result Detail')}">
+<th:block th:fragment="content">
+
+<div class="space-y-6 max-w-4xl mx-auto">
+
+    <!-- Summary Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+            <div>
+                <h2 class="text-base font-semibold text-gray-800" th:text="${attempt.exam.title}">Exam</h2>
+                <p class="text-sm text-gray-500 mt-0.5" th:text="${attempt.student.fullName + ' · ' + attempt.student.username}">Student</p>
+            </div>
+            <a href="/admin/results" class="text-sm text-blue-600 hover:underline">← All Results</a>
+        </div>
+
+        <!-- Score Summary -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="bg-blue-50 rounded-xl p-4 text-center">
+                <div class="text-2xl font-bold text-blue-700" th:text="${attempt.result?.totalScore ?: 0}">0</div>
+                <div class="text-xs text-blue-500 mt-1">Total Score</div>
+            </div>
+            <div class="bg-green-50 rounded-xl p-4 text-center">
+                <div class="text-2xl font-bold text-green-700" th:text="${attempt.result?.correctAnswers ?: 0}">0</div>
+                <div class="text-xs text-green-500 mt-1">Correct</div>
+            </div>
+            <div class="bg-red-50 rounded-xl p-4 text-center">
+                <div class="text-2xl font-bold text-red-700" th:text="${attempt.result?.wrongAnswers ?: 0}">0</div>
+                <div class="text-xs text-red-500 mt-1">Wrong</div>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-4 text-center">
+                <div class="text-2xl font-bold text-gray-700"
+                     th:text="${attempt.result != null ? #numbers.formatDecimal(attempt.result.percentage, 1, 1) + '%' : '0%'}">0%</div>
+                <div class="text-xs text-gray-500 mt-1">Percentage</div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div th:if="${attempt.result}" class="mt-4">
+            <div class="flex justify-between text-xs text-gray-500 mb-1">
+                <span>Score</span>
+                <span th:text="${attempt.result.totalScore + ' / ' + (attempt.exam.totalQuestions * attempt.exam.marksPerCorrect)}">0/0</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-blue-600 h-2 rounded-full transition-all"
+                     th:style="'width:' + ${attempt.result.percentage} + '%'"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Answers Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-5 border-b border-gray-100">
+            <h3 class="font-semibold text-gray-800">Answer Sheet</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Q No.</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Student Answer</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Correct Answer</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Result</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Review</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    <tr th:if="${answers.empty}">
+                        <td colspan="5" class="px-5 py-10 text-center text-gray-400">No answers recorded.</td>
+                    </tr>
+                    <tr th:each="a : ${answers}" class="hover:bg-gray-50">
+                        <td class="px-5 py-2.5 text-gray-600 font-medium" th:text="${'Q' + a.questionNumber}">Q1</td>
+                        <td class="px-5 py-2.5">
+                            <span th:if="${a.selectedOption != null}"
+                                  class="font-bold text-gray-800" th:text="${a.selectedOption}">A</span>
+                            <span th:unless="${a.selectedOption != null}"
+                                  class="text-gray-400 italic text-xs">Not answered</span>
+                        </td>
+                        <td class="px-5 py-2.5 font-bold text-green-700"
+                            th:text="${a.correctOption ?: '-'}">A</td>
+                        <td class="px-5 py-2.5">
+                            <span th:if="${a.selectedOption == null}"
+                                  class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Skipped</span>
+                            <span th:if="${a.selectedOption != null && a.selectedOption == a.correctOption}"
+                                  class="text-xs text-green-700 bg-green-100 px-2 py-0.5 rounded-full font-medium">✓ Correct</span>
+                            <span th:if="${a.selectedOption != null && a.selectedOption != a.correctOption}"
+                                  class="text-xs text-red-700 bg-red-100 px-2 py-0.5 rounded-full font-medium">✗ Wrong</span>
+                        </td>
+                        <td class="px-5 py-2.5">
+                            <span th:if="${a.markedForReview}"
+                                  class="text-xs text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">Marked</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</th:block>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/main :: layout(~{::content}, 'Available Exams')}">
+<th:block th:fragment="content">
+
+<div class="space-y-4">
+    <div th:if="${#lists.isEmpty(exams)}"
+         class="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center text-gray-400">
+        No exams are published at the moment. Check back later.
+    </div>
+
+    <div th:each="e : ${exams}"
+         class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:border-blue-200 transition-colors">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-800" th:text="${e.title}">Exam Title</h3>
+                    <p class="text-sm text-gray-500 mt-1" th:text="${e.description}"></p>
+                    <div class="flex flex-wrap gap-3 mt-2 text-xs text-gray-500">
+                        <span class="flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span th:text="${e.durationMinutes + ' minutes'}">180 minutes</span>
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span th:text="${e.totalQuestions + ' questions'}">150 questions</span>
+                        </span>
+                        <span class="flex items-center gap-1 text-green-600">
+                            +<span th:text="${e.marksPerCorrect}">4</span> correct
+                        </span>
+                        <span class="flex items-center gap-1 text-red-600">
+                            -<span th:text="${e.negativeMarks}">1</span> wrong
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-shrink-0">
+                <a th:href="@{/student/exam/{id}/start(id=${e.id})}"
+                   onclick="return confirm('Start exam? Timer will begin immediately.')"
+                   class="block px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors text-center">
+                    Start Exam →
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</th:block>
+</html>

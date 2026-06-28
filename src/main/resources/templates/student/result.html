@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/main :: layout(~{::content}, 'My Result')}">
+<th:block th:fragment="content">
+
+<div class="max-w-3xl mx-auto space-y-6">
+
+    <!-- Result Summary -->
+    <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white text-center shadow-lg">
+        <h2 class="text-lg font-bold mb-1" th:text="${attempt.exam.title}">Exam</h2>
+        <p class="text-blue-200 text-sm mb-5">Result Summary</p>
+
+        <div class="text-5xl font-extrabold mb-2"
+             th:text="${result != null ? #numbers.formatDecimal(result.percentage, 1, 1) + '%' : '—'}">0%</div>
+        <p class="text-blue-200 text-sm">Overall Score</p>
+
+        <div class="grid grid-cols-3 gap-4 mt-6">
+            <div class="bg-white/10 rounded-xl p-4">
+                <div class="text-2xl font-bold" th:text="${result?.totalScore ?: 0}">0</div>
+                <div class="text-xs text-blue-200 mt-1">Total Score</div>
+            </div>
+            <div class="bg-white/10 rounded-xl p-4">
+                <div class="text-2xl font-bold text-green-300" th:text="${result?.correctAnswers ?: 0}">0</div>
+                <div class="text-xs text-blue-200 mt-1">Correct</div>
+            </div>
+            <div class="bg-white/10 rounded-xl p-4">
+                <div class="text-2xl font-bold text-red-300" th:text="${result?.wrongAnswers ?: 0}">0</div>
+                <div class="text-xs text-blue-200 mt-1">Wrong</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exam Details -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <h3 class="font-semibold text-gray-800 mb-4">Exam Info</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+            <div>
+                <div class="text-xs text-gray-400">Duration</div>
+                <div class="font-medium text-gray-800 mt-0.5" th:text="${attempt.exam.durationMinutes + ' min'}">180 min</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400">Total Questions</div>
+                <div class="font-medium text-gray-800 mt-0.5" th:text="${attempt.exam.totalQuestions}">150</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400">Max Marks</div>
+                <div class="font-medium text-gray-800 mt-0.5"
+                     th:text="${attempt.exam.totalQuestions * attempt.exam.marksPerCorrect}">600</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400">Skipped</div>
+                <div class="font-medium text-gray-800 mt-0.5"
+                     th:text="${result != null ? (attempt.exam.totalQuestions - result.correctAnswers - result.wrongAnswers) : '—'}">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex gap-3">
+        <a href="/student/exams"
+           class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm text-center transition-colors">
+            Take Another Exam
+        </a>
+        <a href="/student/results"
+           class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm text-center transition-colors">
+            All My Results
+        </a>
+    </div>
+</div>
+
+</th:block>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/main :: layout(~{::content}, 'Exam Results')}">
+<th:block th:fragment="content">
+
+<div class="space-y-6">
+
+    <!-- Exam Header -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-base font-semibold text-gray-800" th:text="${exam.title}">Exam</h2>
+                <p class="text-sm text-gray-500">
+                    <span th:text="${exam.totalQuestions}">0</span> questions ·
+                    <span th:text="${exam.durationMinutes}">0</span> min ·
+                    <span th:text="${attempts.size()}">0</span> attempts
+                </p>
+            </div>
+            <a href="/admin/exams" class="text-sm text-blue-600 hover:underline">← All Exams</a>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-5 border-b border-gray-100">
+            <h3 class="font-semibold text-gray-800">Student Attempts</h3>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">#</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Student</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Status</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Score</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Correct</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Wrong</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Percentage</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    <tr th:if="${attempts.empty}">
+                        <td colspan="8" class="px-5 py-12 text-center text-gray-400">No attempts yet.</td>
+                    </tr>
+                    <tr th:each="a, idx : ${attempts}" class="hover:bg-gray-50">
+                        <td class="px-5 py-3 text-gray-400" th:text="${idx.count}">1</td>
+                        <td class="px-5 py-3">
+                            <div class="font-medium text-gray-800" th:text="${a.student.fullName}">Name</div>
+                            <div class="text-xs text-gray-400" th:text="${a.student.username}">user</div>
+                        </td>
+                        <td class="px-5 py-3">
+                            <span th:switch="${a.status?.name()}">
+                                <span th:case="'SUBMITTED'" class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium">Submitted</span>
+                                <span th:case="'IN_PROGRESS'" class="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full font-medium">In Progress</span>
+                                <span th:case="*" class="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full" th:text="${a.status}">-</span>
+                            </span>
+                        </td>
+                        <td class="px-5 py-3 font-semibold text-gray-800"
+                            th:text="${a.result != null ? a.result.totalScore : '-'}">-</td>
+                        <td class="px-5 py-3 text-green-600"
+                            th:text="${a.result != null ? a.result.correctAnswers : '-'}">-</td>
+                        <td class="px-5 py-3 text-red-600"
+                            th:text="${a.result != null ? a.result.wrongAnswers : '-'}">-</td>
+                        <td class="px-5 py-3">
+                            <div th:if="${a.result != null}" class="flex items-center gap-2">
+                                <div class="w-20 bg-gray-200 rounded-full h-1.5">
+                                    <div class="bg-blue-600 h-1.5 rounded-full"
+                                         th:style="'width:' + ${a.result.percentage} + '%'"></div>
+                                </div>
+                                <span class="text-xs text-gray-600"
+                                      th:text="${#numbers.formatDecimal(a.result.percentage, 1, 1) + '%'}">0%</span>
+                            </div>
+                            <span th:unless="${a.result != null}" class="text-gray-400">-</span>
+                        </td>
+                        <td class="px-5 py-3">
+                            <a th:if="${a.status?.name() == 'SUBMITTED'}"
+                               th:href="@{/admin/results/{id}(id=${a.id})}"
+                               class="text-blue-600 hover:text-blue-800 text-xs font-medium">Detail</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</th:block>
+</html>

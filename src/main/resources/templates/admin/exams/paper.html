@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/main :: layout(~{::content}, 'Question Paper')}">
+<th:block th:fragment="content">
+
+<div class="max-w-2xl mx-auto space-y-6">
+
+    <!-- Exam Info Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-base font-semibold text-gray-800" th:text="${exam.title}">Exam Title</h2>
+                <p class="text-sm text-gray-500 mt-0.5">
+                    <span th:text="${exam.totalQuestions}">0</span> questions ·
+                    <span th:text="${exam.durationMinutes}">0</span> minutes
+                </p>
+            </div>
+            <a th:href="@{/admin/exams/{id}/edit(id=${exam.id})}"
+               class="text-sm text-blue-600 hover:underline">Edit Exam</a>
+        </div>
+    </div>
+
+    <!-- Upload Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="font-semibold text-gray-800 mb-4">Upload Question Paper PDF</h3>
+
+        <div th:if="${paper}" class="mb-5 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <div>
+                    <div class="text-sm font-medium text-gray-800">PDF Uploaded</div>
+                    <div class="text-xs text-gray-500">
+                        <span th:text="${paper.totalPages}">0</span> pages extracted
+                    </div>
+                </div>
+            </div>
+            <form th:action="@{/admin/exams/{id}/paper/delete(id=${exam.id})}" method="post"
+                  onsubmit="return confirm('Delete question paper?')">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">Remove</button>
+            </form>
+        </div>
+
+        <form th:action="@{/admin/exams/{id}/paper/upload(id=${exam.id})}"
+              method="post" enctype="multipart/form-data">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+            <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-400 transition-colors">
+                <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+                <p class="text-sm text-gray-500 mb-3">Select PDF file to upload</p>
+                <input type="file" name="file" accept=".pdf" required
+                       class="block mx-auto text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:text-sm file:cursor-pointer hover:file:bg-blue-700"/>
+            </div>
+
+            <button type="submit"
+                    class="mt-4 w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm transition-colors">
+                Upload &amp; Extract Pages
+            </button>
+        </form>
+        <p class="text-xs text-gray-400 mt-3 text-center">
+            Each PDF page is extracted as an image and mapped to one question.
+        </p>
+    </div>
+
+    <!-- Page Preview (if paper exists) -->
+    <div th:if="${paper}" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="font-semibold text-gray-800 mb-4">
+            Extracted Pages (<span th:text="${paper.totalPages}">0</span>)
+        </h3>
+        <div class="grid grid-cols-3 sm:grid-cols-5 gap-3">
+            <div th:each="page : ${paper.pages}"
+                 class="aspect-[3/4] bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-400 font-medium border border-gray-200">
+                Q<span th:text="${page.questionNumber}"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex gap-3">
+        <a th:href="@{/admin/exams/{id}/answers(id=${exam.id})}"
+           class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg text-sm text-center transition-colors">
+            → Set Answer Key
+        </a>
+        <a href="/admin/exams"
+           class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm text-center transition-colors">
+            Back
+        </a>
+    </div>
+</div>
+
+</th:block>
+</html>
