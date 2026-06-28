@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Error — CET Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+
+<div class="w-full max-w-md text-center">
+    <div class="bg-white rounded-2xl shadow-lg p-8">
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <h1 class="text-xl font-bold text-gray-800 mb-2">Something went wrong</h1>
+        <p class="text-sm text-gray-500 mb-6"
+           th:text="${errorMessage ?: 'An unexpected error occurred. Please try again.'}">Error message</p>
+        <div class="flex gap-3 justify-center">
+            <a href="javascript:history.back()"
+               class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition-colors">
+                ← Go Back
+            </a>
+            <a href="/admin/dashboard"
+               class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm transition-colors">
+                Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

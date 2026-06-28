@@ -20,10 +20,11 @@
         <div class="text-sm text-gray-500 mt-1">My Attempts</div>
     </div>
     <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 col-span-2 lg:col-span-1">
-        <div class="text-2xl font-bold text-gray-800"
-             th:text="${#lists.isEmpty(myAttempts) ? '—' :
-             #numbers.formatDecimal(myAttempts.stream().filter(a -> a.result != null).mapToDouble(a -> a.result.percentage).average().orElse(0), 1, 1) + '%'}">—</div>
-        <div class="text-sm text-gray-500 mt-1">Avg Score</div>
+        <div class="text-2xl font-bold text-gray-800">
+            <span th:if="${#lists.isEmpty(myAttempts)}">—</span>
+            <span th:unless="${#lists.isEmpty(myAttempts)}" th:text="${myAttempts.size() + ' total'}">0</span>
+        </div>
+        <div class="text-sm text-gray-500 mt-1">Total Attempts</div>
     </div>
 </div>
 
@@ -39,7 +40,7 @@
             No exams available yet.
         </div>
         <div class="space-y-3">
-            <div th:each="e : ${available}" th:if="${examStat.index < 4}"
+            <div th:each="e, eStat : ${available}" th:if="${eStat.index < 4}"
                  class="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-blue-50 transition-colors">
                 <div>
                     <div class="text-sm font-medium text-gray-800" th:text="${e.title}">Exam</div>
@@ -64,13 +65,13 @@
             No attempts yet. Start an exam!
         </div>
         <div class="space-y-3">
-            <div th:each="a : ${myAttempts}" th:if="${aStat.index < 5}"
+            <div th:each="a, aStat : ${myAttempts}" th:if="${aStat.index < 5}"
                  th:if="${a.status.name() == 'SUBMITTED'}"
                  class="flex items-center justify-between p-3 rounded-lg bg-gray-50">
                 <div>
                     <div class="text-sm font-medium text-gray-800" th:text="${a.exam.title}">Exam</div>
                     <div class="text-xs text-gray-400 mt-0.5">
-                        <span th:if="${a.result}" th:text="${a.result.correctAnswers + ' correct · ' + a.result.wrongAnswers + ' wrong'}"></span>
+                        <span th:if="${a.result}" th:text="${a.result.correct + ' correct · ' + a.result.wrong + ' wrong'}"></span>
                         <span th:unless="${a.result}" th:text="${a.status}"></span>
                     </div>
                 </div>

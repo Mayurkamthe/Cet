@@ -58,11 +58,11 @@
                             </span>
                         </td>
                         <td class="px-5 py-3 font-semibold text-gray-800"
-                            th:text="${a.result != null ? a.result.totalScore : '-'}">-</td>
+                            th:text="${a.result != null ? a.result.rawScore : '-'}">-</td>
                         <td class="px-5 py-3 text-green-600"
-                            th:text="${a.result != null ? a.result.correctAnswers : '-'}">-</td>
+                            th:text="${a.result != null ? a.result.correct : '-'}">-</td>
                         <td class="px-5 py-3 text-red-600"
-                            th:text="${a.result != null ? a.result.wrongAnswers : '-'}">-</td>
+                            th:text="${a.result != null ? a.result.wrong : '-'}">-</td>
                         <td class="px-5 py-3">
                             <div th:if="${a.result != null}" class="flex items-center gap-2">
                                 <div class="w-20 bg-gray-200 rounded-full h-1.5">

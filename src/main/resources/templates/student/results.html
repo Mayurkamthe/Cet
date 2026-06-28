@@ -25,9 +25,9 @@
                 <div>
                     <h3 class="font-semibold text-gray-800" th:text="${a.exam.title}">Exam</h3>
                     <p class="text-xs text-gray-500 mt-0.5">
-                        Score: <strong th:text="${a.result?.totalScore ?: 0}">0</strong> ·
-                        Correct: <span class="text-green-600" th:text="${a.result?.correctAnswers ?: 0}">0</span> ·
-                        Wrong: <span class="text-red-600" th:text="${a.result?.wrongAnswers ?: 0}">0</span>
+                        Score: <strong th:text="${a.result?.rawScore ?: 0}">0</strong> ·
+                        Correct: <span class="text-green-600" th:text="${a.result?.correct ?: 0}">0</span> ·
+                        Wrong: <span class="text-red-600" th:text="${a.result?.wrong ?: 0}">0</span>
                     </p>
                 </div>
             </div>
