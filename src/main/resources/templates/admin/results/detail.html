@@ -18,7 +18,7 @@
         <!-- Score Summary -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div class="bg-blue-50 rounded-xl p-4 text-center">
-                <div class="text-2xl font-bold text-blue-700" th:text="${attempt.result?.rawScore ?: 0}">0</div>
+                <div class="text-2xl font-bold text-blue-700" th:text="${attempt.result != null ? #numbers.formatDecimal(attempt.result.rawScore, 1, 0) : 0}">0</div>
                 <div class="text-xs text-blue-500 mt-1">Total Score</div>
             </div>
             <div class="bg-green-50 rounded-xl p-4 text-center">
@@ -44,7 +44,7 @@
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2">
                 <div class="bg-blue-600 h-2 rounded-full transition-all"
-                     th:style="'width:' + ${attempt.result.percentage} + '%'"></div>
+                     th:style="'width:' + ${attempt.result != null ? attempt.result.percentage : 0} + '%'"></div>
             </div>
         </div>
     </div>

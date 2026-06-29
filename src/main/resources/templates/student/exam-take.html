@@ -254,8 +254,6 @@
     <aside class="w-56 bg-white border-l border-gray-200 overflow-y-auto p-4 hidden md:block">
         <h3 class="text-xs font-semibold text-gray-500 uppercase mb-3">Question Palette</h3>
         <div class="grid grid-cols-5 gap-1">
-            <th:block th:with="answeredNums=${answers.stream().filter(a -> a.selectedOption != null).map(a -> a.questionNumber).toList()},
-                               markedNums=${answers.stream().filter(a -> a.markedForReview).map(a -> a.questionNumber).toList()}">
                 <a th:each="i : ${#numbers.sequence(1, totalQ)}"
                    th:href="@{/student/exam/{id}/take(id=${attempt.id}, q=${i})}"
                    th:text="${i}"
@@ -265,7 +263,6 @@
                                   'bg-gray-100 text-gray-500 hover:bg-blue-50'))"
                    class="aspect-square flex items-center justify-center text-xs font-medium rounded transition-colors">
                 </a>
-            </th:block>
         </div>
 
         <!-- Anti-cheat log in sidebar -->

@@ -117,12 +117,24 @@ public class StudentController {
         long remainingSeconds = (long) exam.getDurationMinutes() * 60 - elapsedSeconds;
         if (remainingSeconds < 0) remainingSeconds = 0;
 
+        // Pre-compute answered/marked numbers for palette (Thymeleaf can't run stream lambdas)
+        java.util.List<Integer> answeredNums = answers.stream()
+            .filter(a -> a.getSelectedOption() != null && !a.getSelectedOption().isBlank())
+            .map(StudentAnswer::getQuestionNumber)
+            .toList();
+        java.util.List<Integer> markedNums = answers.stream()
+            .filter(StudentAnswer::isMarkedForReview)
+            .map(StudentAnswer::getQuestionNumber)
+            .toList();
+
         model.addAttribute("attempt", attempt);
         model.addAttribute("exam", exam);
         model.addAttribute("currentQ", currentQ);
         model.addAttribute("totalQ", totalQ);
         model.addAttribute("questionImagePath", questionImagePath);
         model.addAttribute("answers", answers);
+        model.addAttribute("answeredNums", answeredNums);
+        model.addAttribute("markedNums", markedNums);
         model.addAttribute("currentAnswer", currentAnswer);
         model.addAttribute("currentMarked", currentMarked);
         model.addAttribute("remainingSeconds", remainingSeconds);

@@ -67,7 +67,7 @@
                             <div th:if="${a.result != null}" class="flex items-center gap-2">
                                 <div class="w-20 bg-gray-200 rounded-full h-1.5">
                                     <div class="bg-blue-600 h-1.5 rounded-full"
-                                         th:style="'width:' + ${a.result.percentage} + '%'"></div>
+                                         th:style="'width:' + ${a.result != null ? a.result.percentage : 0} + '%'"></div>
                                 </div>
                                 <span class="text-xs text-gray-600"
                                       th:text="${#numbers.formatDecimal(a.result.percentage, 1, 1) + '%'}">0%</span>

@@ -16,7 +16,7 @@
 
         <div class="grid grid-cols-3 gap-4 mt-6">
             <div class="bg-white/10 rounded-xl p-4">
-                <div class="text-2xl font-bold" th:text="${result?.rawScore ?: 0}">0</div>
+                <div class="text-2xl font-bold" th:text="${result != null ? #numbers.formatDecimal(result.rawScore, 1, 0) : 0}">0</div>
                 <div class="text-xs text-blue-200 mt-1">Total Score</div>
             </div>
             <div class="bg-white/10 rounded-xl p-4">
