@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title th:text="${pageTitle != null ? pageTitle + ' | CET Portal' : 'CET Mock Test Portal'}">CET Portal</title>
+    <title th:text="${pageTitle != null ? pageTitle + ' | ' + institute.name : institute.name}">CET Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -53,16 +53,23 @@
     <aside class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out"
            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'">
 
-        <!-- Logo -->
-        <div class="flex items-center gap-3 h-16 px-6 bg-blue-600">
-            <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
+        <!-- Institute Logo -->
+        <div class="flex items-center gap-3 h-16 px-4 bg-blue-600">
+            <!-- Logo image if configured, else text avatar -->
+            <div class="w-9 h-9 bg-white rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <img th:if="${institute.logoUrl != null and !institute.logoUrl.isEmpty()}"
+                     th:src="${institute.logoUrl}"
+                     th:alt="${institute.name}"
+                     class="w-full h-full object-contain p-0.5"/>
+                <span th:unless="${institute.logoUrl != null and !institute.logoUrl.isEmpty()}"
+                      class="text-blue-600 font-extrabold text-sm"
+                      th:text="${institute.logoText}">CP</span>
             </div>
-            <div>
-                <div class="text-white font-bold text-sm">CET Portal</div>
-                <div class="text-blue-200 text-xs">Mock Test System</div>
+            <div class="min-w-0">
+                <div class="text-white font-bold text-sm leading-tight truncate"
+                     th:text="${institute.name}">CET Portal</div>
+                <div class="text-blue-200 text-xs truncate"
+                     th:text="${institute.tagline}">Mock Test System</div>
             </div>
         </div>
 
@@ -195,7 +202,10 @@
 
         <!-- Footer -->
         <footer class="bg-white border-t border-gray-200 py-3 px-6 text-center text-sm text-gray-400">
-            &copy; 2025 CET Mock Test Portal — Aparaitech Software
+            &copy; 2025 <span th:text="${institute.copyright}">Aparaitech Software</span>
+            <span th:if="${institute.address != null and !institute.address.isEmpty()}">
+                &mdash; <span th:text="${institute.address}"></span>
+            </span>
         </footer>
     </div>
 </div>

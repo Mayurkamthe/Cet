@@ -99,6 +99,35 @@ The admin user is seeded automatically on first startup if no admin exists.
 
 ---
 
+## Institute Branding
+
+All branding (name, logo, tagline, contact) is configured in `application.properties` — no code changes needed.
+
+```properties
+# ── Institute Branding ────────────────────────────────────────────────────
+app.institute.name=Aparaitech Coaching Institute
+app.institute.tagline=Excellence in CET / NEET / JEE Preparation
+
+# Logo: place file in src/main/resources/static/images/ then set the URL
+# Leave empty to show the logoText avatar instead
+app.institute.logoUrl=/images/logo.png
+app.institute.logoText=AI          # 2-3 letter fallback when logoUrl is empty
+
+# Contact info shown in login page footer
+app.institute.address=Baramati, Pune, Maharashtra
+app.institute.phone=+91 98765 43210
+app.institute.email=info@aparaitech.com
+app.institute.copyright=Aparaitech Software
+```
+
+These values appear automatically on:
+- **Login page** — logo, institute name, tagline, address, phone, email
+- **Sidebar header** — logo + name
+- **Browser tab title** — `Page | Institute Name`
+- **Footer** — copyright + address
+
+---
+
 ## Configuration
 
 All key settings are in `src/main/resources/application.properties`:
