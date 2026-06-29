@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -84,5 +85,9 @@ public class UserService {
 
     public long countStudents() {
         return userRepository.countStudents();
+    }
+
+    public List<User> getAllStudentsForExport() {
+        return userRepository.findAllStudents(null, org.springframework.data.domain.Pageable.unpaged()).getContent();
     }
 }
