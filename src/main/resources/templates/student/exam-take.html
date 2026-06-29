@@ -6,26 +6,145 @@
     <title th:text="${exam.title + ' — CET Portal'}">Exam</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>[x-cloak]{display:none!important}</style>
-</head>
-<body class="bg-gray-100 font-sans antialiased"
-      x-data="examApp()"
-      x-init="startTimer()">
+    <style>
+        [x-cloak] { display: none !important; }
 
-<!-- Top Bar -->
+        /* Disable text selection and copy during exam */
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* Warning overlay backdrop */
+        #cheat-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0,0,0,0.85);
+            align-items: center;
+            justify-content: center;
+        }
+        #cheat-overlay.show {
+            display: flex;
+        }
+
+        /* Shake animation for warning */
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
+        }
+        .shake { animation: shake 0.4s ease; }
+
+        /* Warning badge pulse */
+        @keyframes badge-pulse {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .badge-pulse { animation: badge-pulse 1.5s infinite; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans antialiased no-select"
+      x-data="examApp()"
+      x-init="startTimer(); initAntiCheat();">
+
+<!-- ═══════════════════════════════════════════════
+     ANTI-CHEAT WARNING OVERLAY
+     Shows on every violation; auto-submits at max
+════════════════════════════════════════════════════ -->
+<div id="cheat-overlay" role="alertdialog" aria-modal="true">
+    <div id="cheat-card"
+         class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+
+        <!-- Red header -->
+        <div class="bg-red-600 px-6 py-5 text-white text-center">
+            <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            <h2 class="text-xl font-bold">⚠ Suspicious Activity Detected</h2>
+        </div>
+
+        <!-- Body -->
+        <div class="px-6 py-5 text-center">
+            <p id="cheat-reason" class="text-gray-700 text-sm mb-3 font-medium">
+                Tab switch detected.
+            </p>
+
+            <!-- Warning counter -->
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <span class="text-sm text-gray-500">Warnings:</span>
+                <div class="flex gap-1" id="warning-dots"></div>
+                <span id="warning-count-text" class="text-sm font-bold text-red-600"></span>
+            </div>
+
+            <div id="cheat-final-msg" class="hidden mb-4 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+                <p class="text-red-700 text-sm font-semibold">
+                    Maximum violations reached. Your exam is being submitted automatically.
+                </p>
+            </div>
+
+            <p class="text-xs text-gray-400 mb-5">
+                This incident has been recorded. Repeated violations will result in automatic submission.
+            </p>
+
+            <button id="cheat-dismiss-btn"
+                    onclick="dismissWarning()"
+                    class="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg text-sm transition-colors">
+                I Understand — Return to Exam
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TOP BAR
+════════════════════════════════════════════════════ -->
 <header class="fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-200 h-14 flex items-center justify-between px-4 shadow-sm">
-    <div class="font-semibold text-gray-800 text-sm truncate max-w-xs" th:text="${exam.title}">Exam</div>
+    <div class="flex items-center gap-3">
+        <div class="font-semibold text-gray-800 text-sm truncate max-w-xs" th:text="${exam.title}">Exam</div>
+
+        <!-- Warning badge (shows after first violation) -->
+        <div id="warning-badge"
+             class="hidden items-center gap-1 bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full badge-pulse">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2L1 21h22L12 2zm0 3.5L20.5 19h-17L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/>
+            </svg>
+            <span id="badge-count">0</span> warning(s)
+        </div>
+    </div>
+
     <div class="flex items-center gap-4">
+        <!-- Fullscreen toggle -->
+        <button onclick="toggleFullscreen()" title="Toggle Fullscreen"
+                class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
+            <svg id="fs-icon-enter" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+            </svg>
+            <svg id="fs-icon-exit" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 9V4m0 5H4m5 0L3 3m12 6h5m-5 0V4m0 5l6-6M9 15v5m0-5H4m5 5l-6 6m12-6h5m-5 0v5m0-5l6 6"/>
+            </svg>
+        </button>
+
         <!-- Timer -->
         <div class="flex items-center gap-2 font-mono text-base font-bold"
              :class="timeLeft <= 300 ? 'text-red-600' : 'text-gray-800'">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <span x-text="formatTime(timeLeft)">00:00:00</span>
         </div>
-        <!-- Submit Button -->
-        <form th:action="@{/student/exam/{id}/submit(id=${attempt.id})}" method="post"
+
+        <!-- Submit -->
+        <form th:action="@{/student/exam/{id}/submit(id=${attempt.id})}" method="post" id="submit-form"
               onsubmit="return confirm('Submit exam? You cannot change answers after submission.')">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <button type="submit"
@@ -36,6 +155,9 @@
     </div>
 </header>
 
+<!-- ═══════════════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════════════════ -->
 <div class="pt-14 flex h-screen overflow-hidden">
 
     <!-- Question Panel -->
@@ -48,7 +170,7 @@
                     Question <span class="text-blue-600 font-bold" th:text="${currentQ}">1</span>
                     of <span th:text="${totalQ}">100</span>
                 </div>
-                <div class="flex gap-2 text-xs">
+                <div class="flex gap-3 text-xs">
                     <span class="flex items-center gap-1 text-green-600">
                         <span class="w-3 h-3 bg-green-500 rounded-sm inline-block"></span>Answered
                     </span>
@@ -65,7 +187,8 @@
             <div class="bg-white rounded-xl border border-gray-100 p-5 mb-4">
                 <div th:if="${questionImagePath != null}">
                     <img th:src="${questionImagePath}" alt="Question"
-                         class="w-full rounded-lg border border-gray-100 max-h-[60vh] object-contain"/>
+                         class="w-full rounded-lg border border-gray-100 max-h-[60vh] object-contain"
+                         oncontextmenu="return false;" draggable="false"/>
                 </div>
                 <div th:unless="${questionImagePath != null}"
                      class="text-center py-16 text-gray-400">
@@ -109,7 +232,7 @@
                 </div>
             </div>
 
-            <!-- Navigation Buttons -->
+            <!-- Navigation -->
             <div class="flex justify-between gap-3">
                 <a th:if="${currentQ > 1}"
                    th:href="@{/student/exam/{id}/take(id=${attempt.id}, q=${currentQ - 1})}"
@@ -127,7 +250,7 @@
         </div>
     </main>
 
-    <!-- Question Palette (sidebar) -->
+    <!-- Question Palette -->
     <aside class="w-56 bg-white border-l border-gray-200 overflow-y-auto p-4 hidden md:block">
         <h3 class="text-xs font-semibold text-gray-500 uppercase mb-3">Question Palette</h3>
         <div class="grid grid-cols-5 gap-1">
@@ -144,16 +267,254 @@
                 </a>
             </th:block>
         </div>
+
+        <!-- Anti-cheat log in sidebar -->
+        <div class="mt-5 pt-4 border-t border-gray-100">
+            <p class="text-xs font-semibold text-gray-400 uppercase mb-2">Integrity</p>
+            <div id="sidebar-log" class="space-y-1 text-xs text-gray-400">
+                <p class="text-green-600 font-medium">✓ Monitoring active</p>
+            </div>
+        </div>
     </aside>
 </div>
 
+<!-- ═══════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════ -->
 <script th:inline="javascript">
-    const ATTEMPT_ID = /*[[${attempt.id}]]*/ 0;
-    const CURRENT_Q = /*[[${currentQ}]]*/ 1;
-    const CSRF_TOKEN = /*[[${_csrf.token}]]*/ '';
-    let selectedOption = /*[[${currentAnswer}]]*/ null;
-    let isMarked = /*[[${currentMarked}]]*/ false;
+    /* ── Server-injected constants ── */
+    const ATTEMPT_ID   = /*[[${attempt.id}]]*/ 0;
+    const CURRENT_Q    = /*[[${currentQ}]]*/ 1;
+    const CSRF_TOKEN   = /*[[${_csrf.token}]]*/ '';
 
+    let selectedOption = /*[[${currentAnswer}]]*/ null;
+    let isMarked       = /*[[${currentMarked}]]*/ false;
+
+    /* ══════════════════════════════════════════════
+       ANTI-CHEAT ENGINE
+    ═══════════════════════════════════════════════ */
+    const MAX_WARNINGS   = 3;   // auto-submit after this many
+    let   warningCount   = 0;
+    let   overlayVisible = false;
+
+    /* ---------- show warning overlay ---------- */
+    function showWarning(reason) {
+        warningCount++;
+        updateWarningUI();
+
+        const overlay   = document.getElementById('cheat-overlay');
+        const reasonEl  = document.getElementById('cheat-reason');
+        const card      = document.getElementById('cheat-card');
+        const finalMsg  = document.getElementById('cheat-final-msg');
+        const dismissBtn = document.getElementById('cheat-dismiss-btn');
+
+        reasonEl.textContent = reason;
+        overlay.classList.add('show');
+        overlayVisible = true;
+
+        // Shake animation
+        card.classList.remove('shake');
+        void card.offsetWidth; // reflow to restart animation
+        card.classList.add('shake');
+
+        // Log in sidebar
+        const log = document.getElementById('sidebar-log');
+        if (log) {
+            const entry = document.createElement('p');
+            entry.className = 'text-red-500';
+            const time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            entry.textContent = `⚠ ${time}: ${reason.substring(0, 30)}`;
+            log.appendChild(entry);
+        }
+
+        // Auto-submit if max warnings reached
+        if (warningCount >= MAX_WARNINGS) {
+            finalMsg.classList.remove('hidden');
+            dismissBtn.disabled = true;
+            dismissBtn.textContent = 'Submitting exam…';
+            dismissBtn.classList.add('opacity-60', 'cursor-not-allowed');
+
+            // Give student 3 seconds to read the message, then submit
+            setTimeout(() => {
+                forceSubmit();
+            }, 3000);
+        }
+    }
+
+    /* ---------- dismiss overlay ---------- */
+    function dismissWarning() {
+        if (warningCount >= MAX_WARNINGS) return; // blocked
+        document.getElementById('cheat-overlay').classList.remove('show');
+        overlayVisible = false;
+
+        // Re-request fullscreen if they exited
+        if (!document.fullscreenElement) {
+            requestFullscreen();
+        }
+    }
+
+    /* ---------- force submit ---------- */
+    function forceSubmit() {
+        const form = document.getElementById('submit-form');
+        if (form) {
+            // Remove confirmation dialog for forced submit
+            form.onsubmit = null;
+            form.submit();
+        }
+    }
+
+    /* ---------- update warning dots & badge ---------- */
+    function updateWarningUI() {
+        // Dots in overlay
+        const dotsEl  = document.getElementById('warning-dots');
+        const countEl = document.getElementById('warning-count-text');
+        const badge   = document.getElementById('warning-badge');
+        const badgeCount = document.getElementById('badge-count');
+
+        if (dotsEl) {
+            dotsEl.innerHTML = '';
+            for (let i = 0; i < MAX_WARNINGS; i++) {
+                const dot = document.createElement('span');
+                dot.className = `w-3 h-3 rounded-full ${i < warningCount ? 'bg-red-500' : 'bg-gray-200'}`;
+                dotsEl.appendChild(dot);
+            }
+        }
+        if (countEl) {
+            countEl.textContent = `${warningCount} / ${MAX_WARNINGS}`;
+        }
+
+        // Header badge
+        if (badge && badgeCount) {
+            badge.classList.remove('hidden');
+            badge.classList.add('flex');
+            badgeCount.textContent = warningCount;
+        }
+    }
+
+    /* ══════════════════════════════════════════════
+       FULLSCREEN HELPERS
+    ═══════════════════════════════════════════════ */
+    function requestFullscreen() {
+        const el = document.documentElement;
+        if (el.requestFullscreen)            el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        else if (el.mozRequestFullScreen)    el.mozRequestFullScreen();
+        else if (el.msRequestFullscreen)     el.msRequestFullscreen();
+    }
+
+    function toggleFullscreen() {
+        if (document.fullscreenElement) {
+            document.exitFullscreen && document.exitFullscreen();
+        } else {
+            requestFullscreen();
+        }
+    }
+
+    function updateFullscreenIcon() {
+        const inFS   = !!document.fullscreenElement;
+        const enter  = document.getElementById('fs-icon-enter');
+        const exit   = document.getElementById('fs-icon-exit');
+        if (enter) enter.classList.toggle('hidden', inFS);
+        if (exit)  exit.classList.toggle('hidden', !inFS);
+    }
+
+    /* ══════════════════════════════════════════════
+       ANTI-CHEAT INIT — called from Alpine x-init
+    ═══════════════════════════════════════════════ */
+    function initAntiCheat() {
+
+        /* 1. Enter fullscreen immediately */
+        requestFullscreen();
+
+        /* 2. Tab / window visibility change */
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && !overlayVisible) {
+                showWarning('Tab switch or window minimized detected.');
+            }
+        });
+
+        /* 3. Window blur (focus lost to another app/tab) */
+        window.addEventListener('blur', () => {
+            if (!overlayVisible) {
+                showWarning('Window focus lost — possible tab switch.');
+            }
+        });
+
+        /* 4. Fullscreen exit (student pressed Esc) */
+        document.addEventListener('fullscreenchange', () => {
+            updateFullscreenIcon();
+            if (!document.fullscreenElement && !overlayVisible) {
+                showWarning('Fullscreen mode exited. Please stay in fullscreen.');
+            }
+        });
+        document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
+
+        /* 5. Right-click disable */
+        document.addEventListener('contextmenu', e => e.preventDefault());
+
+        /* 6. Block keyboard shortcuts */
+        document.addEventListener('keydown', e => {
+            const forbidden = [
+                e.key === 'F12',                                         // DevTools
+                e.ctrlKey && ['c','v','u','s','a','p','f'].includes(e.key.toLowerCase()), // Ctrl+C/V/U/S/A/P/F
+                e.metaKey && ['c','v','u','s','a','p','f'].includes(e.key.toLowerCase()), // Cmd equivalents
+                e.altKey  && e.key === 'Tab',                            // Alt+Tab
+                e.key === 'PrintScreen',                                 // Screenshot
+                e.ctrlKey && e.shiftKey && ['i','j','c','k'].includes(e.key.toLowerCase()), // Ctrl+Shift+I/J/C/K
+                e.metaKey && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase()),
+            ];
+
+            if (forbidden.some(Boolean)) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!overlayVisible) {
+                    showWarning(`Keyboard shortcut blocked: ${e.ctrlKey || e.metaKey ? 'Ctrl/' : ''}${e.key}`);
+                }
+                return false;
+            }
+        }, true);
+
+        /* 7. Block copy/cut/paste events */
+        ['copy', 'cut', 'paste'].forEach(evt => {
+            document.addEventListener(evt, e => {
+                e.preventDefault();
+                if (!overlayVisible) {
+                    showWarning(`${evt.charAt(0).toUpperCase() + evt.slice(1)} action blocked.`);
+                }
+            });
+        });
+
+        /* 8. Block drag (image drag-out) */
+        document.addEventListener('dragstart', e => e.preventDefault());
+
+        /* 9. DevTools size heuristic — triggers if DevTools panel opens */
+        let devtoolsOpen = false;
+        setInterval(() => {
+            const threshold = 160;
+            const widthDiff  = window.outerWidth  - window.innerWidth;
+            const heightDiff = window.outerHeight - window.innerHeight;
+            if ((widthDiff > threshold || heightDiff > threshold) && !devtoolsOpen) {
+                devtoolsOpen = true;
+                if (!overlayVisible) showWarning('Developer tools detected.');
+            } else if (widthDiff <= threshold && heightDiff <= threshold) {
+                devtoolsOpen = false;
+            }
+        }, 1500);
+
+        /* 10. Mouse leaves viewport (moving to another window/tab) */
+        document.addEventListener('mouseleave', e => {
+            if (e.clientY <= 0 && !overlayVisible) {
+                showWarning('Mouse left exam window — possible tab switch attempt.');
+            }
+        });
+
+        console.log('%c⛔ STOP!', 'color:red;font-size:48px;font-weight:bold;');
+        console.log('%cThis browser feature is disabled during the exam. Using DevTools is a violation.', 'color:red;font-size:14px;');
+    }
+
+    /* ══════════════════════════════════════════════
+       ALPINE EXAM APP
+    ═══════════════════════════════════════════════ */
     function examApp() {
         return {
             timeLeft: /*[[${remainingSeconds}]]*/ 0,
@@ -165,7 +526,7 @@
                         this.timeLeft--;
                     } else {
                         clearInterval(this.timer);
-                        document.querySelector('form[action*="submit"]').submit();
+                        forceSubmit();
                     }
                 }, 1000);
             },
@@ -179,15 +540,14 @@
 
             async selectOption(opt) {
                 selectedOption = opt;
-                // Update UI
                 document.querySelectorAll('[data-option]').forEach(btn => {
-                    btn.classList.remove('ring-2', 'ring-blue-600', 'bg-blue-50', 'text-blue-700');
-                    btn.classList.add('bg-gray-50', 'text-gray-700');
+                    btn.classList.remove('ring-2','ring-blue-600','bg-blue-50','text-blue-700');
+                    btn.classList.add('bg-gray-50','text-gray-700');
                 });
                 const btn = document.querySelector(`[data-option="${opt}"]`);
                 if (btn) {
-                    btn.classList.remove('bg-gray-50', 'text-gray-700');
-                    btn.classList.add('ring-2', 'ring-blue-600', 'bg-blue-50', 'text-blue-700');
+                    btn.classList.remove('bg-gray-50','text-gray-700');
+                    btn.classList.add('ring-2','ring-blue-600','bg-blue-50','text-blue-700');
                 }
                 await this.saveAnswer();
             },
@@ -195,8 +555,8 @@
             async clearAnswer() {
                 selectedOption = null;
                 document.querySelectorAll('[data-option]').forEach(btn => {
-                    btn.classList.remove('ring-2', 'ring-blue-600', 'bg-blue-50', 'text-blue-700');
-                    btn.classList.add('bg-gray-50', 'text-gray-700');
+                    btn.classList.remove('ring-2','ring-blue-600','bg-blue-50','text-blue-700');
+                    btn.classList.add('bg-gray-50','text-gray-700');
                 });
                 await this.saveAnswer();
             },
