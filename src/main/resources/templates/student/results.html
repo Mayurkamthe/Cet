@@ -22,8 +22,8 @@
                 <div class="w-14 h-14 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
                      th:classappend="${a.result != null && a.result.percentage >= 60} ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
                      th:text="${a.result != null ? #numbers.formatDecimal(a.result.percentage, 1, 0) + '%' : '—'}">0%</div>
-                <div>
-                    <h3 class="font-semibold text-gray-800" th:text="${a.exam.title}">Exam</h3>
+                <div class="min-w-0 flex-1">
+                    <h3 class="font-semibold text-gray-800 truncate" th:text="${a.exam.title}">Exam</h3>
                     <p class="text-xs text-gray-500 mt-0.5">
                         Score: <strong th:text="${a.result?.rawScore ?: 0}">0</strong> ·
                         Correct: <span class="text-green-600" th:text="${a.result?.correct ?: 0}">0</span> ·
