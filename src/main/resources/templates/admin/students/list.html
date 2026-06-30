@@ -59,8 +59,23 @@
             </thead>
             <tbody class="divide-y divide-gray-50">
                 <tr th:if="${students.empty}">
-                    <td colspan="7" class="px-5 py-12 text-center text-gray-400">
-                        No students found. <a href="/admin/students/new" class="text-blue-600 hover:underline">Add one</a>
+                    <td colspan="7" class="px-5 py-16">
+                        <div class="flex flex-col items-center justify-center text-center gap-3">
+                            <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center">
+                                <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-gray-600 font-medium">No students yet</p>
+                                <p class="text-gray-400 text-sm mt-0.5">Add your first student to get started</p>
+                            </div>
+                            <a href="/admin/students/new"
+                               class="mt-1 inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                                + Add Student
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 <tr th:each="s, idx : ${students}" class="hover:bg-gray-50 transition-colors">
