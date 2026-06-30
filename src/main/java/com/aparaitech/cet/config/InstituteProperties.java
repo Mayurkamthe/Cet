@@ -2,10 +2,16 @@ package com.aparaitech.cet.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Institute branding config — loaded from application.properties under prefix "app.institute".
+ *
+ * NOTE: This class is intentionally NOT annotated with @Component.
+ * It is registered as a bean via @EnableConfigurationProperties(InstituteProperties.class)
+ * in CetApplication. Adding @Component here as well creates two competing bean
+ * definitions for the same type, which Spring may reject at startup (BeanDefinitionStoreException)
+ * or resolve inconsistently — causing the @ModelAttribute("institute") in
+ * GlobalModelAttributes to fail intermittently across pages.
  *
  * Example:
  *   app.institute.name=Aparaitech Coaching Institute
@@ -16,7 +22,6 @@ import org.springframework.stereotype.Component;
  *   app.institute.phone=+91 98765 43210
  *   app.institute.email=info@aparaitech.com
  */
-@Component
 @ConfigurationProperties(prefix = "app.institute")
 @Data
 public class InstituteProperties {
