@@ -4,6 +4,15 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Environment / Secrets ###
+.env
+.env.local
+
+### Local Data (SQLite + uploads) ###
+data/
+src/main/resources/static/uploads/*
+!src/main/resources/static/uploads/.gitkeep
+
 ### STS ###
 .apt_generated
 .classpath
