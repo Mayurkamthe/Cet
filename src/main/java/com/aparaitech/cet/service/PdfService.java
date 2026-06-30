@@ -36,20 +36,37 @@ public class PdfService {
 
     private final QuestionPaperRepository questionPaperRepository;
     private final ExamRepository examRepository;
+    private final jakarta.persistence.EntityManager entityManager;
 
     /**
      * Uploads a PDF question paper for an exam, converts each page to PNG,
      * saves them, and stores metadata in the database.
+     *
+     * Fix for "UNIQUE constraint failed: question_papers.exam_id":
+     * The exam_id column has a unique constraint (one paper per exam). When
+     * replacing an existing paper, the old row MUST be deleted and flushed
+     * to the database BEFORE the new row is inserted, otherwise both rows
+     * exist simultaneously within the same transaction and SQLite rejects
+     * the insert. We also explicitly clear the cached association on the
+     * Exam entity so Hibernate doesn't try to re-attach the deleted child.
      */
     public QuestionPaper uploadQuestionPaper(Long examId, MultipartFile file) throws IOException {
         Exam exam = examRepository.findById(examId)
             .orElseThrow(() -> new RuntimeException("Exam not found"));
 
-        // Delete old paper if exists
+        // Delete old paper if exists — delete AND flush before any insert
         questionPaperRepository.findByExamId(examId).ifPresent(old -> {
             deletePages(old);
+            exam.setQuestionPaper(null);
             questionPaperRepository.delete(old);
+            questionPaperRepository.flush();
+            entityManager.flush();
+            entityManager.clear();
         });
+
+        // Re-fetch exam after clearing persistence context
+        exam = examRepository.findById(examId)
+            .orElseThrow(() -> new RuntimeException("Exam not found"));
 
         // Prepare directories
         Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
@@ -122,5 +139,13 @@ public class PdfService {
             deletePages(paper);
             questionPaperRepository.delete(paper);
         });
+    }
+
+    /**
+     * Used by the controller to ask "replace existing file?" before uploading,
+     * rather than letting a UNIQUE constraint error bubble up to the user.
+     */
+    public boolean hasQuestionPaper(Long examId) {
+        return questionPaperRepository.findByExamId(examId).isPresent();
     }
 }

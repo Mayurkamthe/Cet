@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/main :: layout(~{::content}, 'Preview Exam')}">
+<th:block th:fragment="content">
+
+<div class="max-w-3xl mx-auto space-y-6">
+
+    <!-- Step indicator -->
+    <div class="flex items-center justify-center gap-2 mb-2 text-xs font-medium">
+        <span class="flex items-center gap-1.5 text-green-600">
+            <span class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center">✓</span>
+            Create Exam
+        </span>
+        <span class="w-8 h-px bg-gray-300"></span>
+        <span class="flex items-center gap-1.5 text-green-600">
+            <span class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center">✓</span>
+            Upload Paper
+        </span>
+        <span class="w-8 h-px bg-gray-300"></span>
+        <span class="flex items-center gap-1.5 text-green-600">
+            <span class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center">✓</span>
+            Answer Key
+        </span>
+        <span class="w-8 h-px bg-gray-300"></span>
+        <span class="flex items-center gap-1.5 text-blue-600">
+            <span class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center">4</span>
+            Preview
+        </span>
+        <span class="w-8 h-px bg-gray-300"></span>
+        <span class="flex items-center gap-1.5 text-gray-400">
+            <span class="w-6 h-6 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center">5</span>
+            Publish
+        </span>
+    </div>
+
+    <!-- Exam Summary -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-start justify-between mb-4">
+            <div>
+                <h2 class="text-lg font-bold text-gray-800" th:text="${exam.title}">Exam Title</h2>
+                <p class="text-sm text-gray-500 mt-1" th:text="${exam.description}"></p>
+            </div>
+            <span th:switch="${exam.status?.name()}">
+                <span th:case="'DRAFT'" class="bg-yellow-100 text-yellow-700 text-xs px-3 py-1 rounded-full font-medium">Draft</span>
+                <span th:case="'PUBLISHED'" class="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium">Published</span>
+                <span th:case="*" class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full font-medium" th:text="${exam.status}"></span>
+            </span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+            <div>
+                <div class="text-xs text-gray-400">Type</div>
+                <div class="font-medium text-gray-800 mt-0.5" th:text="${exam.examType}">CET</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400">Duration</div>
+                <div class="font-medium text-gray-800 mt-0.5" th:text="${exam.durationMinutes + ' min'}">180 min</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400">Questions</div>
+                <div class="font-medium text-gray-800 mt-0.5" th:text="${exam.totalQuestions}">150</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400">Marking</div>
+                <div class="font-medium text-gray-800 mt-0.5">
+                    +<span th:text="${exam.marksPerCorrect}">4</span> / -<span th:text="${exam.negativeMarks}">1</span>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${exam.startAt != null or exam.endAt != null}"
+             class="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 gap-4 text-sm">
+            <div>
+                <div class="text-xs text-gray-400">Starts</div>
+                <div class="font-medium text-gray-800 mt-0.5"
+                     th:text="${exam.startAt != null ? #temporals.format(exam.startAt, 'dd MMM yyyy, hh:mm a') : 'Not set'}">-</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400">Ends</div>
+                <div class="font-medium text-gray-800 mt-0.5"
+                     th:text="${exam.endAt != null ? #temporals.format(exam.endAt, 'dd MMM yyyy, hh:mm a') : 'Not set'}">-</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Readiness Checklist -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="font-semibold text-gray-800 mb-4">Publish Checklist</h3>
+        <div class="space-y-3">
+            <div class="flex items-center justify-between p-3 rounded-lg"
+                 th:classappend="${paper != null} ? 'bg-green-50' : 'bg-red-50'">
+                <div class="flex items-center gap-3">
+                    <svg th:if="${paper != null}" class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <svg th:unless="${paper != null}" class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <div>
+                        <div class="text-sm font-medium text-gray-800">Question Paper</div>
+                        <div class="text-xs text-gray-500" th:if="${paper != null}"
+                             th:text="${paper.originalFileName + ' — ' + paper.totalPages + ' pages'}"></div>
+                        <div class="text-xs text-red-500" th:unless="${paper != null}">Not uploaded yet</div>
+                    </div>
+                </div>
+                <a th:href="@{/admin/exams/{id}/paper(id=${exam.id})}"
+                   class="text-xs font-medium text-blue-600 hover:underline">
+                    <span th:text="${paper != null ? 'Change' : 'Upload'}"></span>
+                </a>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-lg"
+                 th:classappend="${answerKey != null} ? 'bg-green-50' : 'bg-red-50'">
+                <div class="flex items-center gap-3">
+                    <svg th:if="${answerKey != null}" class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <svg th:unless="${answerKey != null}" class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <div>
+                        <div class="text-sm font-medium text-gray-800">Answer Key</div>
+                        <div class="text-xs text-gray-500" th:if="${answerKey != null}"
+                             th:text="${answerKey.answerList.size() + ' answers set'}"></div>
+                        <div class="text-xs text-red-500" th:unless="${answerKey != null}">Not set yet</div>
+                    </div>
+                </div>
+                <a th:href="@{/admin/exams/{id}/answers(id=${exam.id})}"
+                   class="text-xs font-medium text-blue-600 hover:underline">
+                    <span th:text="${answerKey != null ? 'Change' : 'Set'}"></span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Question Paper Preview Grid -->
+    <div th:if="${paper}" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="font-semibold text-gray-800 mb-4">
+            Question Paper Preview (<span th:text="${paper.totalPages}">0</span> pages)
+        </h3>
+        <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 max-h-96 overflow-y-auto">
+            <div th:each="page : ${paper.pages}"
+                 class="aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden border border-gray-200 relative">
+                <img th:src="${page.imagePath}" th:alt="'Q' + ${page.questionNumber}"
+                     class="w-full h-full object-cover"/>
+                <span class="absolute bottom-1 right-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
+                    Q<span th:text="${page.questionNumber}"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Answer Key Preview -->
+    <div th:if="${answerKey}" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="font-semibold text-gray-800 mb-4">Answer Key Preview</h3>
+        <div class="grid grid-cols-10 gap-1.5 max-h-40 overflow-y-auto">
+            <div th:each="ans, i : ${answerKey.answerList}"
+                 class="aspect-square rounded text-xs flex flex-col items-center justify-center bg-blue-50 text-blue-700 font-medium">
+                <span class="text-[9px] text-blue-400" th:text="${i.count}"></span>
+                <span class="font-bold" th:text="${ans}"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex gap-3">
+        <form th:if="${exam.status?.name() == 'DRAFT' and paper != null and answerKey != null}"
+              th:action="@{/admin/exams/{id}/publish(id=${exam.id})}" method="post" class="flex-1">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit"
+                    onclick="return confirm('Publish this exam? Students will be able to attempt it immediately.')"
+                    class="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg text-sm transition-colors">
+                ✓ Publish Exam
+            </button>
+        </form>
+        <div th:if="${exam.status?.name() == 'DRAFT' and (paper == null or answerKey == null)}"
+             class="flex-1 py-3 bg-gray-100 text-gray-400 font-medium rounded-lg text-sm text-center">
+            Complete the checklist above to publish
+        </div>
+        <a href="/admin/exams"
+           class="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm text-center transition-colors">
+            Back to Exams
+        </a>
+    </div>
+</div>
+
+</th:block>
+</html>

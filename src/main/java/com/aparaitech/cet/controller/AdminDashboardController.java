@@ -24,6 +24,9 @@ public class AdminDashboardController {
         model.addAttribute("totalExams", examService.countTotal());
         model.addAttribute("activeExams", examService.countPublished());
         model.addAttribute("draftExams", examService.countDraft());
+        model.addAttribute("liveExams", examService.countLive());
+        model.addAttribute("upcomingExams", examService.countUpcoming());
+        model.addAttribute("completedExams", examService.countCompleted());
         model.addAttribute("recentAttempts", attemptService.getAllAttempts()
             .stream().limit(10).toList());
         return "admin/dashboard";

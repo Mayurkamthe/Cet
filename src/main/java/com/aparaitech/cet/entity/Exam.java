@@ -43,7 +43,10 @@ public class Exam {
     @Builder.Default
     private ExamStatus status = ExamStatus.DRAFT;
 
-    private LocalDateTime scheduledAt;
+    private LocalDateTime scheduledAt; // legacy, kept for backward compatibility
+
+    private LocalDateTime startAt;
+    private LocalDateTime endAt;
 
     @OneToOne(mappedBy = "exam", cascade = CascadeType.ALL, orphanRemoval = true)
     private QuestionPaper questionPaper;

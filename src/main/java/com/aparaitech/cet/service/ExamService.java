@@ -31,10 +31,22 @@ public class ExamService {
         return examRepository.findById(id);
     }
 
+    /**
+     * Validates that endAt is strictly after startAt when both are provided.
+     * Thrown as IllegalArgumentException so the controller can show a
+     * friendly flash message instead of a stack trace.
+     */
+    private void validateSchedule(LocalDateTime startAt, LocalDateTime endAt) {
+        if (startAt != null && endAt != null && !endAt.isAfter(startAt)) {
+            throw new IllegalArgumentException("End date/time must be after the start date/time.");
+        }
+    }
+
     public Exam createExam(String title, String description, String examType,
                            Integer durationMinutes, Integer totalQuestions,
                            Integer marksPerCorrect, Integer negativeMarks,
-                           LocalDateTime scheduledAt) {
+                           LocalDateTime startAt, LocalDateTime endAt) {
+        validateSchedule(startAt, endAt);
         Exam exam = Exam.builder()
             .title(title)
             .description(description)
@@ -43,7 +55,9 @@ public class ExamService {
             .totalQuestions(totalQuestions)
             .marksPerCorrect(marksPerCorrect != null ? marksPerCorrect : 4)
             .negativeMarks(negativeMarks != null ? negativeMarks : 1)
-            .scheduledAt(scheduledAt)
+            .startAt(startAt)
+            .endAt(endAt)
+            .scheduledAt(startAt) // keep legacy field in sync
             .status(Exam.ExamStatus.DRAFT)
             .build();
         return examRepository.save(exam);
@@ -52,7 +66,8 @@ public class ExamService {
     public Exam updateExam(Long id, String title, String description, String examType,
                            Integer durationMinutes, Integer totalQuestions,
                            Integer marksPerCorrect, Integer negativeMarks,
-                           LocalDateTime scheduledAt) {
+                           LocalDateTime startAt, LocalDateTime endAt) {
+        validateSchedule(startAt, endAt);
         Exam exam = examRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Exam not found"));
         exam.setTitle(title);
@@ -62,7 +77,9 @@ public class ExamService {
         exam.setTotalQuestions(totalQuestions);
         exam.setMarksPerCorrect(marksPerCorrect);
         exam.setNegativeMarks(negativeMarks);
-        exam.setScheduledAt(scheduledAt);
+        exam.setStartAt(startAt);
+        exam.setEndAt(endAt);
+        exam.setScheduledAt(startAt);
         return examRepository.save(exam);
     }
 
@@ -87,4 +104,22 @@ public class ExamService {
     public long countTotal() { return examRepository.count(); }
     public long countPublished() { return examRepository.countByStatus(Exam.ExamStatus.PUBLISHED); }
     public long countDraft() { return examRepository.countByStatus(Exam.ExamStatus.DRAFT); }
+
+    /** Exams whose window has started but not ended — "Live" for dashboard. */
+    public long countLive() {
+        LocalDateTime now = LocalDateTime.now();
+        return examRepository.countLive(now, Exam.ExamStatus.PUBLISHED);
+    }
+
+    /** Published exams whose start time is in the future. */
+    public long countUpcoming() {
+        LocalDateTime now = LocalDateTime.now();
+        return examRepository.countUpcoming(now, Exam.ExamStatus.PUBLISHED);
+    }
+
+    /** Exams whose end time has passed, or which are explicitly closed. */
+    public long countCompleted() {
+        LocalDateTime now = LocalDateTime.now();
+        return examRepository.countCompleted(now, Exam.ExamStatus.CLOSED);
+    }
 }

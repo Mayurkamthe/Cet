@@ -5,7 +5,7 @@
 <th:block th:fragment="content">
 
 <!-- Stats Cards -->
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
 
     <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
         <div class="flex items-center justify-between mb-3">
@@ -15,7 +15,7 @@
                           d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                 </svg>
             </div>
-            <span class="text-xs text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full">Students</span>
+            <span class="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full">Students</span>
         </div>
         <div class="text-2xl font-bold text-gray-800" th:text="${totalStudents}">0</div>
         <div class="text-sm text-gray-500 mt-1">Total Students</div>
@@ -37,16 +37,17 @@
 
     <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
         <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center relative">
+                <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></span>
                 <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                          d="M13 10V3L4 14h7v7l9-11h-7z"/>
                 </svg>
             </div>
-            <span class="text-xs text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full">Live</span>
+            <span class="text-xs text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full">Live Now</span>
         </div>
-        <div class="text-2xl font-bold text-gray-800" th:text="${activeExams}">0</div>
-        <div class="text-sm text-gray-500 mt-1">Active Exams</div>
+        <div class="text-2xl font-bold text-gray-800" th:text="${liveExams}">0</div>
+        <div class="text-sm text-gray-500 mt-1">Live Exams</div>
     </div>
 
     <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
@@ -61,6 +62,49 @@
         </div>
         <div class="text-2xl font-bold text-gray-800" th:text="${draftExams}">0</div>
         <div class="text-sm text-gray-500 mt-1">Draft Exams</div>
+    </div>
+</div>
+
+<div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+            </div>
+            <span class="text-xs text-indigo-600 font-medium bg-indigo-50 px-2 py-0.5 rounded-full">Upcoming</span>
+        </div>
+        <div class="text-2xl font-bold text-gray-800" th:text="${upcomingExams}">0</div>
+        <div class="text-sm text-gray-500 mt-1">Scheduled Exams</div>
+    </div>
+
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <span class="text-xs text-gray-600 font-medium bg-gray-100 px-2 py-0.5 rounded-full">Done</span>
+        </div>
+        <div class="text-2xl font-bold text-gray-800" th:text="${completedExams}">0</div>
+        <div class="text-sm text-gray-500 mt-1">Completed Exams</div>
+    </div>
+
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-dashed border-gray-200 sm:col-span-2 lg:col-span-1">
+        <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+            </div>
+            <span class="text-xs text-gray-400 font-medium bg-gray-100 px-2 py-0.5 rounded-full">Coming Soon</span>
+        </div>
+        <div class="text-2xl font-bold text-gray-300">—</div>
+        <div class="text-sm text-gray-400 mt-1">Question Bank Stats</div>
     </div>
 </div>
 

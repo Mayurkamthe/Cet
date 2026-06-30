@@ -5,17 +5,78 @@
 
 <div class="max-w-3xl mx-auto space-y-6">
 
+    <!-- Step indicator -->
+    <div class="flex items-center justify-center gap-2 mb-2 text-xs font-medium">
+        <span class="flex items-center gap-1.5 text-green-600">
+            <span class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center">✓</span>
+            Create Exam
+        </span>
+        <span class="w-8 h-px bg-gray-300"></span>
+        <span class="flex items-center gap-1.5 text-green-600">
+            <span class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center">✓</span>
+            Upload Paper
+        </span>
+        <span class="w-8 h-px bg-gray-300"></span>
+        <span class="flex items-center gap-1.5 text-blue-600">
+            <span class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center">3</span>
+            Answer Key
+        </span>
+        <span class="w-8 h-px bg-gray-300"></span>
+        <span class="flex items-center gap-1.5 text-gray-400">
+            <span class="w-6 h-6 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center">4</span>
+            Preview
+        </span>
+        <span class="w-8 h-px bg-gray-300"></span>
+        <span class="flex items-center gap-1.5 text-gray-400">
+            <span class="w-6 h-6 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center">5</span>
+            Publish
+        </span>
+    </div>
+
     <!-- Header -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex items-center justify-between">
         <div>
             <h2 class="text-base font-semibold text-gray-800" th:text="${exam.title}">Exam</h2>
-            <p class="text-sm text-gray-500">Enter the correct option (A/B/C/D) for each question</p>
+            <p class="text-sm text-gray-500">Set the correct option (A/B/C/D) for each question</p>
         </div>
         <span th:if="${answerKey}"
               class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">Key Saved</span>
     </div>
 
-    <!-- Answer Form -->
+    <!-- Upload File Option (item #4) -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6"
+         x-data="{ fileName: '' }">
+        <h3 class="font-semibold text-gray-800 mb-1">Upload Answer Key File</h3>
+        <p class="text-xs text-gray-400 mb-4">Supports Excel (.xlsx, .xls) or CSV — one answer per row, e.g. "1,A" or just "A"</p>
+
+        <form th:action="@{/admin/exams/{id}/answers/upload(id=${exam.id})}"
+              method="post" enctype="multipart/form-data" class="flex items-center gap-3">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+            <label class="flex-1 flex items-center gap-3 border-2 border-dashed border-gray-300 hover:border-purple-400 rounded-lg px-4 py-3 cursor-pointer transition-colors">
+                <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span class="text-sm text-gray-500" x-text="fileName || 'Choose Excel or CSV file...'"></span>
+                <input type="file" name="file" accept=".xlsx,.xls,.csv" required class="hidden"
+                       @change="fileName = $event.target.files[0]?.name || ''"/>
+            </label>
+
+            <button type="submit"
+                    class="px-5 py-3 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-lg transition-colors flex-shrink-0">
+                Upload
+            </button>
+        </form>
+    </div>
+
+    <div class="flex items-center gap-3">
+        <div class="flex-1 h-px bg-gray-200"></div>
+        <span class="text-xs text-gray-400 font-medium">OR ENTER MANUALLY</span>
+        <div class="flex-1 h-px bg-gray-200"></div>
+    </div>
+
+    <!-- Manual Answer Form -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <form th:action="@{/admin/exams/{id}/answers(id=${exam.id})}" method="post">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
@@ -52,6 +113,13 @@
                    class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm text-center">Back</a>
             </div>
         </form>
+    </div>
+
+    <div th:if="${answerKey}" class="flex gap-3">
+        <a th:href="@{/admin/exams/{id}/preview(id=${exam.id})}"
+           class="flex-1 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg text-sm text-center transition-colors">
+            → Continue to Preview
+        </a>
     </div>
 </div>
 
