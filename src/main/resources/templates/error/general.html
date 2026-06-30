@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -24,9 +25,17 @@
                class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition-colors">
                 ← Go Back
             </a>
-            <a href="/admin/dashboard"
+            <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard"
                class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm transition-colors">
                 Dashboard
+            </a>
+            <a sec:authorize="hasRole('STUDENT')" href="/student/dashboard"
+               class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm transition-colors">
+                Dashboard
+            </a>
+            <a sec:authorize="isAnonymous()" href="/login"
+               class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm transition-colors">
+                Login
             </a>
         </div>
     </div>
